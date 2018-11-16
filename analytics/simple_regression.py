@@ -12,14 +12,33 @@ class simple_regression(object):
         """
 
         try:
-
             # add your code here
+            
+            #l contains number of columns
+            l = len(df_input.columns)
+
+
+            statistics_header = []
+            for i in range(0,l):        
+            statistics_header.append(df.columns[i])
+        
+            statistics_index = []
+            statistics_index.append("Mean")
+            statistics_index.append("Variance") 
+            statistics_index.append("Standard Deviation")
+            statistics_index.append("Co-variance") 
+            statistics_index.append("Correlation Factor") 
+            statistics_index.append("Is r significant?") 
+            statistics_index.append("Partial Correlation Factor")
+
+
 
             coeff = {"m": 0.12, "c": 1.2} # this is testdata, replace with actual calculated data
             result = dict()
             result["coeff"] = coeff
             result["status"] = "success"
             return result
+        
         except Exception as e:
             result = dict()
             result["coeff"] = {"error": str(e)}
