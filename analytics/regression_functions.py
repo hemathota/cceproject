@@ -13,6 +13,11 @@ cor = "Correlation Factor"
 rsig = "Is r significant?"
 #partialr = "Partial Correlation Factor"
 
+
+##############################################################################
+# read_csv_into_df: 
+# reads a CSV file and stores it in a data frame
+##############################################################################
 def read_csv_into_df(file_path):
     #print(file_path)
 
@@ -27,11 +32,22 @@ def read_csv_into_df(file_path):
     return my_df
 
 
+##############################################################################
+# training_data: 
+# given a data frame, returns 70% of it's content as a dataframe
+# which is used as data for training
+##############################################################################
 def training_data(df):
     count = get_count(df)
     x_train= int(0.7 * count)
     return(df.iloc[0:x_train])
 
+
+##############################################################################
+# testing_data: 
+# given a data frame, returns 30% of it's content as a dataframe
+# which is used as data for testing (scoring)
+##############################################################################
 def testing_data(df):
     count = get_count(df)
     x_train= int(0.7 * count)
@@ -40,15 +56,30 @@ def testing_data(df):
     return(df_test)
 
 
+
+##############################################################################
+# df_to_dict: 
+# converts a data-frame into a dictionary
+##############################################################################
 def df_to_dict(df):
     return (df.to_dict('index'))
 
 
+
+##############################################################################
+# dict_to_df: 
+# converts a dictionary into a data-frame
+##############################################################################
 def dict_to_df(dict):
     df = pd.DataFrame.from_dict(dict, orient='index')
     return df
 
 
+
+##############################################################################
+# get_count: 
+# given a data frame, returns the number of records present in the dataframe
+##############################################################################
 def get_count(my_df):
     my_count = 0
     for i in my_df.index:
@@ -60,6 +91,12 @@ def get_count(my_df):
     return my_count
 
 
+
+##############################################################################
+# get_sum: 
+# given a data frame and a column in the dataframe,
+# returns the sum of the values in that column
+##############################################################################
 def get_sum( my_df, my_col_name):
     my_col_sum = 0 
     for i in my_df.index:
@@ -71,10 +108,16 @@ def get_sum( my_df, my_col_name):
     return my_col_sum
 
 
-
+##############################################################################
+# get_mean: 
+# given an input data frame and a column in the dataframe,
+# calculates and populates the statistics dataframe with mean for that column 
+##############################################################################
 def get_mean(statistic_df, my_df, my_col_name):
     my_count = get_count(my_df)
     my_sum = get_sum(my_df,my_col_name)
+
+    # mean = sum / n
     my_mean = my_sum / my_count
 
     statistic_df.loc[mean][my_col_name] = my_mean
@@ -83,11 +126,18 @@ def get_mean(statistic_df, my_df, my_col_name):
 
 
 
+##############################################################################
+# get_SD: 
+# given an input data frame and a column in the dataframe,
+# calculates and populates the statistics dataframe with variance 
+# and standard deviation for that column 
+##############################################################################
 def get_SD(statistic_df, my_df, my_col_name):
     my_count = get_count(my_df)
     my_mean = get_mean(statistic_df, my_df, my_col_name)
     my_sum_of_squares = 0
     
+    # we are finding sum[(x-mean)2]
     for i in my_df.index:
         my_sum_of_squares = my_sum_of_squares + ( (my_df.iloc[i][my_col_name] - my_mean) * (my_df.iloc[i][my_col_name] - my_mean))
 
@@ -100,12 +150,20 @@ def get_SD(statistic_df, my_df, my_col_name):
     return my_sd
 
 
+
+##############################################################################
+# get_covariance: 
+# given an input data frame and 2 column names,
+# calculates and populates the statistics dataframe with covariance between 
+# the 2 columns
+##############################################################################
 def get_covariance(statistic_df, my_df, my_col_name_x, my_col_name_y):
     my_count = get_count(my_df)
     my_mean_x = get_mean(statistic_df, my_df, my_col_name_x)
     my_mean_y = get_mean(statistic_df, my_df, my_col_name_y)
 
     my_sum_of_products = 0 
+    # we are finding sum[ (x - xmean) * (y - ymean)]
     for i in my_df.index:
         my_sum_of_products = my_sum_of_products + ( (my_df.iloc[i][my_col_name_x] - my_mean_x) * (my_df.iloc[i][my_col_name_y] - my_mean_y))
 
@@ -116,12 +174,21 @@ def get_covariance(statistic_df, my_df, my_col_name_x, my_col_name_y):
 
 
 
+
+##############################################################################
+# get_r: 
+# given an input data frame and 2 column names,
+# calculates and populates the statistics dataframe with the correlation
+# factor and indicates if the correlation factor is significant or not
+##############################################################################
 def get_r(statistic_df, my_df, my_col_name_x, my_col_name_y):
+
     my_count = get_count(my_df)
     my_sd_x = get_SD(statistic_df, my_df, my_col_name_x, )
     my_sd_y = get_SD(statistic_df, my_df, my_col_name_y)
     my_covariance = get_covariance(statistic_df, my_df, my_col_name_x, my_col_name_y)
 
+    # r = covariance (x,y) / [ sd(x) * sd(y) ]
     r =  my_covariance / (my_sd_x * my_sd_y)
     r_significant = 1.96 / math.sqrt(my_count)
 
@@ -134,10 +201,16 @@ def get_r(statistic_df, my_df, my_col_name_x, my_col_name_y):
     
 	
 
-
+##############################################################################
+# calculate_statistics: 
+# given an input data frame, 
+# populates the statistics data frame with computed values 
+# by looping through each independent variable 
+##############################################################################
 def calculate_statistics(df):
     
     #define statistics df
+
     #finding number of columns in input dataframe
     l = len(df.columns)
 
@@ -184,6 +257,7 @@ def calculate_statistics(df):
     #print("\n\nStatistics calculated:\n")
     #print(statistic_df)
 
+    #note: we are storing the thresold for r to be signifant in the r column for y in statistics df for reference
     count = get_count(df)
     r_significant = 1.96 / math.sqrt(count)
     statistic_df.loc[cor][col_name_y] = r_significant
@@ -193,11 +267,18 @@ def calculate_statistics(df):
     return(statistic_df)
 
  
-
+##############################################################################
+# solve_eqn: 
+# computes the coefficients for a linear equation with 'n' variables
+# it's a recursive function where n, rdf (Regression dataframe) get computed 
+# for each iteration, whereas total_n (intial number of unknows) 
+# and rc (contains final answer) remain same for every call
+##############################################################################
 def solve_eqn(rc, total_n, n, rdf):
 
     #print("\n\nn: "+str(n))
 
+    #recursive call stops here... when we have only 1 variable to calculate
     if(n == 1):                 #rdf will be 1*2
         y = rdf.iloc[0][1]/rdf.iloc[0][0]           
         rc[total_n - n] = y
@@ -261,8 +342,16 @@ def solve_eqn(rc, total_n, n, rdf):
     #print("Regression coefficients so far (n = "+ str(n) +"): \n" + str(rc))
 
 
-	
+
+##############################################################################
+# get_regression_coeff: 
+# finds out number of independent variables which have a significant linear 
+# relation with dependent variable (y) and forms the equation using them
+# calls the solve_eqn to get the coefficients for the equation for y
+# it also finds out the regression matrix 
+##############################################################################
 def get_regression_coeff(statistic_df, df): 
+
     #k is used to store the number of independent columns where there is a significant correlation with y
     count = get_count(df) 
     l = len(df.columns)
@@ -349,6 +438,11 @@ def get_regression_coeff(statistic_df, df):
     return rc
 
 
+##############################################################################
+# calculated_expected_values: 
+# given the coefficients and the input data frame, finds out the expected 
+# value of y and returns a dataframe containing input data frame + expected value
+##############################################################################
 def calculated_expected_values(df, coeff, statistic_df):
 
     #print(coeff)
